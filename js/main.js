@@ -12,7 +12,8 @@ jQuery.fn.html5Upload = function(settings){
         'drop_area' : $(".drop_area"),
         'uploadFile' : "/var/www/html",
         'showProgress' : false,
-        'maxUploadSize' : 20480 // 20MB
+        'maxUploadSize' : 20480, // 20MB
+        'maxUploads' : false
     };
 
     // merge/overwrite settings from function params
@@ -24,8 +25,8 @@ jQuery.fn.html5Upload = function(settings){
     var dropArea       = config.drop_area;
     var destinationUrl = config.uploadFile;
     var maxUploadSize  = config.maxUploadSize;
+    var maxUploads     = config.maxUploads;
 
-    console.log(maxUploadSize);
     var totalSize      = 0;
     var totalProgress  = 0;
 
@@ -76,7 +77,11 @@ jQuery.fn.html5Upload = function(settings){
       // add some DOM elements so we can keep track of each file 
       // check the file size to make sure it's not too big
       // If everything complies, send the AJAX request to upload.
-      for(i=0; i<filelist.length; i++)
+      var numFilesAllowed = (!maxUploads) ? filelist.length : maxUploads;
+      console.log(numFilesAllowed);
+      
+      for(i=0; i<numFilesAllowed; i++)
+
       {
 
         var fileInfoDivDetails    = $("<div/>").attr("class", "fileDetails fileDetails" + i);
