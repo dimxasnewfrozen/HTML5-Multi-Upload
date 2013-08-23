@@ -10,10 +10,12 @@ jQuery.fn.html5Upload = function(settings){
     // settings
     var config = {
         'drop_area' : $(".drop_area"),
-        'uploadFile' : "/var/www/html",
+        'uploadFile' : "/var/www/html/upload.php",
+        'uploadDir' : "uploads",
         'showProgress' : false,
         'maxUploadSize' : 20480, // 20MB
-        'maxUploads' : false
+        'maxUploads' : false,
+        'async' : true
     };
 
     // merge/overwrite settings from function params
@@ -26,7 +28,8 @@ jQuery.fn.html5Upload = function(settings){
     var destinationUrl = config.uploadFile;
     var maxUploadSize  = config.maxUploadSize;
     var maxUploads     = config.maxUploads;
-
+    var uploadDir      = config.uploadDir;
+    var async          = config.async;
     var totalSize      = 0;
     var totalProgress  = 0;
 
@@ -77,12 +80,12 @@ jQuery.fn.html5Upload = function(settings){
       // add some DOM elements so we can keep track of each file 
       // check the file size to make sure it's not too big
       // If everything complies, send the AJAX request to upload.
-      var numFilesAllowed = (!maxUploads) ? filelist.length : maxUploads;
-      console.log(numFilesAllowed);
-      
-      for(i=0; i<numFilesAllowed; i++)
+      var numFilesAllowed = (!maxUploads || filelist.length < maxUploads) ? filelist.length : maxUploads;
 
+      for(i=0; i<numFilesAllowed; i++)
       {
+
+        totalProgress  = 0;
 
         var fileInfoDivDetails    = $("<div/>").attr("class", "fileDetails fileDetails" + i);
         fileInfoDiv.append(fileInfoDivDetails);
@@ -96,7 +99,7 @@ jQuery.fn.html5Upload = function(settings){
         var fileNameDiv =  $("<div/>").attr("class", "fileName")
                             .html(filename);
         var filesizeDiv =  $("<div/>").html(filesize);
-        var statusDiv =  $("<div/>").attr("class", "status"+i);
+        var statusDiv   =  $("<div/>").attr("class", "status"+i);
 
         // Add the new element to the DOM
         fileInfoDivDetails.append(fileNameDiv);
@@ -111,16 +114,96 @@ jQuery.fn.html5Upload = function(settings){
         else 
         {
           // the file size is ok, so we can beging to upload the file
-          uploadFile(filelist[i]); 
+          uploadFile(filelist[i], i); 
         }
       }
     }// end processFiles
 
 
     // actually upload the file
-    function uploadFile(file) {
-      console.log(file);
+    function uploadFile(file, index) 
+    {
+
+        var status    = $(".status" + index);
+        var fileDiv   = $(".fileDetails" + index);
+
+        var progress_div = $("<div>").
+                                attr("class", "upload_progress upload_progress" + index);
+
+        var progress_percent = $("<div>").
+                                attr("class", "upload_percent upload_percent" + index);
+
+        fileDiv.append(progress_div);
+        progress_div.append(progress_percent);      
+
+        var fileSize  = file.size;
+        totalProgress = 0;
+
+        // prepare XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', destinationUrl, async);
+
+        xhr.onload = function() {
+
+            var data = $.parseJSON(this.responseText);
+           
+            if (this.status != "200") 
+            {
+                //$(".progress_content").addClass("hide");
+                status.html("A " + this.status + " error occured. Try again!");
+            }
+           
+            if (data.status == "error") 
+            {
+                //$(".progress_content").addClass("hide");
+                status.html("Error. " + data.message + " Try again!");
+            }
+            else 
+            {
+                // done - no errors
+            }
+            handleComplete(fileSize, status, index);
+        };
+
+        xhr.onerror = function() 
+        {
+            //handleComplete(fileSize, status, index);
+        }
+
+        xhr.upload.onprogress = function(event){
+           handleProgress(event, status, fileSize, index);
+        }
+
+        xhr.upload.onloadstart = function(event) 
+        {
+
+        }
+        
+        // prepare FormData and send the upload details
+        var formData = new FormData();  
+        formData.append('myfile', file); 
+        formData.append('uploadDir', uploadDir); 
+        xhr.send(formData);
+        
+    }
+     // on complete - start next file
+    function handleComplete(size, status, index) {
+        console.log("completed");
+        drawProgress(1, status);
     }
 
+    // update progress
+    function handleProgress(event, status, fileSize, index) 
+    {
+        var progress = totalProgress + event.loaded;
+        drawProgress((progress / fileSize), status, index);
+    }
+    
+    // draw progress
+    function drawProgress(progress, status, index) 
+    {   
+        status.html(Math.floor(progress * 100) + '% completed');
+        $(".upload_percent" + index).css("width", Math.floor(progress * 100) + "%");
+    }
 };
 

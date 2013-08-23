@@ -26,11 +26,13 @@
 		need to pass it as a parameter.
 		*/
 		var params = ({
-			'drop_area' : $(".drop_area"),
-			'uploadFile' : "/var/www/html",
-        	'showProgress' : false,
-        	'maxUploadSize' : 20480, // 20MB
-        	'maxUploads' : false
+	        'drop_area' : $(".drop_area"),
+	        'uploadFile' : "upload.php",
+	        'uploadDir' : "uploads",
+	        'showProgress' : false,
+	        'maxUploadSize' : 10000020480, // 20MB
+	        'maxUploads' : 5,
+	        'async' : true
 		});
 
    		$(".uploader").html5Upload(params);
