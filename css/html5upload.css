@@ -1,0 +1,55 @@
+/* 
+HTML5 jQuery Upload Plugin
+Developed By Ken Day
+http://www.html5plugin.com
+*/
+
+.uploader 
+{
+	width:400px;
+	margin:20px auto;
+}
+
+.drop_area 
+{
+	width:400px;
+	height:150px;
+	border:4px dashed #D1D1D1;
+}
+
+.drop_text 
+{	
+	width:140px;
+	margin:60px auto;
+	font-size:14px;
+	font-weight: bold;
+	color:#999999;
+}
+
+.drop_area.hover
+{
+	border:4px dashed #63C3FF;
+	color:#63C3FF;
+}
+
+/* Assigned in plugin. Override styles here */
+.fileinfo 
+{
+
+}
+
+/* Assigned in plugin. Override styles here */
+.fileDetails 
+{
+	margin:5px;
+	border-bottom:1px solid #EBEBEB;
+	padding-bottom:10px;
+	padding-top:10px;
+}
+
+/* Assigned in plugin. Override styles here */
+.fileName
+{
+	color: #63C3FF;
+    font-size: 14px;
+}

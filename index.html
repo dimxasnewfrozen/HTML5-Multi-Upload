@@ -8,9 +8,9 @@
 
 	<title>HTML5 Upload Plugin</title>
 
-	<link href='css/main.css' rel='stylesheet' type='text/css'>
+	<link href='css/html5upload.css' rel='stylesheet' type='text/css'>
 	<script src="js/jquery-1.8.2.js"></script>
-	<script src="js/main.js"></script>
+	<script src="js/html5upload.js"></script>
 
 	<script>
 
@@ -30,7 +30,7 @@
 			'uploadFile' : "/var/www/html",
         	'showProgress' : false,
         	'maxUploadSize' : 20480, // 20MB
-        	'maxUploads' : 1
+        	'maxUploads' : false
 		});
 
    		$(".uploader").html5Upload(params);
