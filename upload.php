@@ -6,7 +6,26 @@ if (isset($_FILES['myfile']))
     $sFileName  = $_FILES['myfile']['name'];
     $sFileType  = $_FILES['myfile']['type'];
     $sTmpName   = $_FILES['myfile']['tmp_name'];
-    $uploadFile = $_POST['uploadDir'] . "/" . $sFileName;
+    $uploadDir  = $_POST['uploadDir'];
+    $uploadFile = $uploadDir . "/" . $sFileName;
+
+    // check if path exists
+    if (!file_exists($uploadDir))
+    {
+        $return_array = array("status" => "error", "file_name" => $sFileName, "message" => "Upload directory does not exist.");
+        echo json_encode($return_array);
+        exit;
+    }
+
+    // check if path is writable
+    if (!is_writable($uploadDir)) 
+    {
+        $return_array = array("status" => "error", "file_name" => $sFileName, "message" => "Upload directory is not writable");
+        echo json_encode($return_array);
+        exit;
+    }
+    
+
 
     if (file_exists($uploadFile))
     {

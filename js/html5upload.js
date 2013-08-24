@@ -15,7 +15,8 @@ jQuery.fn.html5Upload = function(settings){
         'showProgress' : false,
         'maxUploadSize' : 20480, // 20MB
         'maxUploads' : false,
-        'async' : true
+        'async' : true,
+        'fileFormats' : false
     };
 
     // merge/overwrite settings from function params
@@ -30,6 +31,8 @@ jQuery.fn.html5Upload = function(settings){
     var maxUploads     = config.maxUploads;
     var uploadDir      = config.uploadDir;
     var async          = config.async;
+    var formats        = config.fileFormats;
+
     var totalSize      = 0;
     var totalProgress  = 0;
 
@@ -91,15 +94,20 @@ jQuery.fn.html5Upload = function(settings){
         fileInfoDiv.append(fileInfoDivDetails);
 
         // assign some vars from our filelist object
-        var filename    = filelist[i].name;
-        var filesize    = filelist[i].size;
-        var filemoddate = filelist[i].lastModifiedDate;
+        var filename     = filelist[i].name;
+        var filesize     = filelist[i].size;
+        var format       = filelist[i].type;
+
+
+        var readableSize = humanFileSize(filesize);
+        var filemoddate  = filelist[i].lastModifiedDate;
 
         // create some DOM elements with the above var values
         var fileNameDiv =  $("<div/>").attr("class", "fileName")
                             .html(filename);
-        var filesizeDiv =  $("<div/>").html(filesize);
-        var statusDiv   =  $("<div/>").attr("class", "status"+i);
+        var filesizeDiv =  $("<div/>").attr("class", "fileSize")
+                            .html(readableSize);
+        var statusDiv   =  $("<div/>").attr("class", "status status"+i);
 
         // Add the new element to the DOM
         fileInfoDivDetails.append(fileNameDiv);
@@ -111,9 +119,19 @@ jQuery.fn.html5Upload = function(settings){
         {
           $(".status"+i).html("Error: File is over the max file size allowed");
         }
+        else if ($.inArray(format, formats) < 0)
+        {
+          $(".status"+i).html("Error: Invalid file fomrat.");
+        }
         else 
         {
           // the file size is ok, so we can beging to upload the file
+          // send an ajax request to the php file to make sure 
+            // # Todo
+            // 1) The directory exists
+            // 2) The file name doesn't already exist
+            // we want to do this otherwise we're going to upload the file to the tmp dir anyway
+            // don't upload to the tmp dir if we have errors!
           uploadFile(filelist[i], i); 
         }
       }
@@ -151,12 +169,14 @@ jQuery.fn.html5Upload = function(settings){
             {
                 //$(".progress_content").addClass("hide");
                 status.html("A " + this.status + " error occured. Try again!");
+                return false;
             }
            
             if (data.status == "error") 
             {
                 //$(".progress_content").addClass("hide");
                 status.html("Error. " + data.message + " Try again!");
+                return false;
             }
             else 
             {
@@ -205,5 +225,20 @@ jQuery.fn.html5Upload = function(settings){
         status.html(Math.floor(progress * 100) + '% completed');
         $(".upload_percent" + index).css("width", Math.floor(progress * 100) + "%");
     }
+
+    // readable file size:
+    function humanFileSize(bytes) {
+        var thresh = 1024;
+
+        if(bytes < thresh) return bytes + ' B';
+        var units = ['kB','MB','GB','TB','PB','EB','ZB','YB'];
+        var u = -1;
+        do {
+            bytes /= thresh;
+            ++u;
+        } while(bytes >= thresh);
+        return bytes.toFixed(1)+' '+units[u];
+    };
+
 };
 
